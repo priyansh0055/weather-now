@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import WeatherResultScreen from "./WeatherResultScreen";
 
 export default function WEATHER({ initialCity }) {
   const [city, setcity] = useState(initialCity || "");
-  const [weather, setweather] = useState();
+  const [weather, setweather] = useState(null);
   const [loading, setloading] = useState(false);
   const [error, seterror] = useState("");
+  const [unit, setunit] = useState("metric"); // 'metric' = °C, 'imperial' = °F
 
   const handlecitychange = (event) => {
     setcity(event.target.value);
   };
 
-  const fetchweather = async (cityToFetch) => {
+  const fetchweather = async (cityToFetch, unitToUse = unit) => {
     setloading(true);
     seterror("");
     setweather(null);
     try {
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${cityToFetch}&appid=${process.env.REACT_APP_WEATHER_KEY}`,
+        `https://api.openweathermap.org/data/2.5/weather`,
+        {
+          params: {
+            q: cityToFetch,
+            appid: process.env.REACT_APP_WEATHER_KEY,
+            units: unitToUse, // now asking OWM for °C/°F directly, no more manual Kelvin math
+          },
+        }
       );
       setweather(response.data);
       seterror("");
@@ -39,6 +48,14 @@ export default function WEATHER({ initialCity }) {
     fetchweather(city);
   };
 
+  const handletoggleunit = () => {
+    const nextunit = unit === "metric" ? "imperial" : "metric";
+    setunit(nextunit);
+    if (weather?.name) {
+      fetchweather(weather.name, nextunit);
+    }
+  };
+
   // Auto-fetch when a city arrives from WeatherSearchScreen
   useEffect(() => {
     if (initialCity && initialCity.trim()) {
@@ -49,24 +66,17 @@ export default function WEATHER({ initialCity }) {
   }, [initialCity]);
 
   return (
-    <div className="weather-container">
-      <input
-        type="text"
-        placeholder="enter your city name"
-        value={city}
-        onChange={handlecitychange}
-      />
-      <button onClick={processcity}> get weather </button>
-      {loading && <p>Loading...</p>}
-      {error && <p className="error-text">{error}</p>}
-      {weather && (
-        <div className="weather-info">
-          <h2>{weather.name}</h2>
-          <p>Temperature: {(weather.main.temp - 273.15).toFixed(1)} °C</p>
-          <p>Humidity: {weather.main.humidity}%</p>
-          <p>Condition: {weather.weather[0].main}</p>
-        </div>
-      )}
-    </div>
+    <WeatherResultScreen
+      data={weather}
+      loading={loading}
+      error={error}
+      unit={unit}
+      onToggleUnit={handletoggleunit}
+      onBack={() => {
+        setweather(null);
+        setcity("");
+        seterror("");
+      }}
+    />
   );
 }

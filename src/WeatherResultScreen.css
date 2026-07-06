@@ -1,0 +1,409 @@
+/* ==========================================================
+   WeatherResultScreen — cinematic sky scene + glass stats card
+   Scoped under .wr- to avoid collisions with Tailwind / other screens.
+   ========================================================== */
+
+.wr-root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #f5f6fa;
+  display: flex;
+  flex-direction: column;
+  transition: background 1.2s ease;
+}
+
+/* ---------- Sky gradients (day / night x weather group) ---------- */
+.wr-scene-day.wr-clear     { background: linear-gradient(180deg, #4facfe 0%, #a1e3ff 45%, #eaf6ff 100%); }
+.wr-scene-day.wr-clouds    { background: linear-gradient(180deg, #7f9cc4 0%, #b8c6db 55%, #e2e9f2 100%); }
+.wr-scene-day.wr-rain      { background: linear-gradient(180deg, #4b5d75 0%, #6c7f96 55%, #91a2b5 100%); }
+.wr-scene-day.wr-storm     { background: linear-gradient(180deg, #2c3245 0%, #454d63 55%, #5b6579 100%); }
+.wr-scene-day.wr-snow      { background: linear-gradient(180deg, #7ea6c9 0%, #cfe4f2 55%, #f2f8fc 100%); }
+.wr-scene-day.wr-fog       { background: linear-gradient(180deg, #93a1ab 0%, #c3cdd4 55%, #e6ebee 100%); }
+
+.wr-scene-night.wr-clear   { background: linear-gradient(180deg, #05070f 0%, #0f1c3f 50%, #1b2a52 100%); }
+.wr-scene-night.wr-clouds  { background: linear-gradient(180deg, #0d1017 0%, #232a3b 55%, #333c50 100%); }
+.wr-scene-night.wr-rain    { background: linear-gradient(180deg, #05060a 0%, #171d2b 55%, #232b3d 100%); }
+.wr-scene-night.wr-storm   { background: linear-gradient(180deg, #030308 0%, #10121c 55%, #1a1d2b 100%); }
+.wr-scene-night.wr-snow    { background: linear-gradient(180deg, #0c1120 0%, #1d2a44 55%, #2c3c5c 100%); }
+.wr-scene-night.wr-fog     { background: linear-gradient(180deg, #0a0c10 0%, #1b1f26 55%, #2a2f38 100%); }
+
+/* ---------- Sky layer ---------- */
+.wr-sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.wr-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.28) 100%);
+  pointer-events: none;
+}
+
+/* Sun / moon on an arc */
+.wr-celestial {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 3s linear, top 3s linear;
+  z-index: 1;
+}
+
+.wr-sun {
+  background: radial-gradient(circle at 35% 30%, #fff9e6, #ffd76b 55%, #ffb347 100%);
+  box-shadow: 0 0 60px 18px rgba(255, 200, 90, 0.55);
+}
+
+.wr-moon {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #d9e2ec 55%, #b7c3d1 100%);
+  box-shadow: 0 0 40px 10px rgba(200, 215, 255, 0.35);
+}
+
+/* Stars */
+.wr-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  animation: wr-twinkle 3.5s ease-in-out infinite;
+}
+@keyframes wr-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.95; }
+}
+
+/* Clouds drifting across */
+.wr-cloud {
+  position: absolute;
+  left: -220px;
+  width: 200px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 100px;
+  filter: blur(2px);
+  animation-name: wr-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.wr-cloud::before,
+.wr-cloud::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+.wr-cloud::before { width: 90px; height: 90px; top: -45px; left: 25px; }
+.wr-cloud::after  { width: 70px; height: 70px; top: -30px; left: 110px; }
+
+.wr-scene-night .wr-cloud { background: rgba(150, 160, 190, 0.35); }
+
+@keyframes wr-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(100vw + 240px)); }
+}
+
+/* Rain */
+.wr-rain-layer { position: absolute; inset: 0; }
+.wr-raindrop {
+  position: absolute;
+  top: -20px;
+  width: 2px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(190, 220, 255, 0), rgba(190, 220, 255, 0.75));
+  animation-name: wr-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes wr-fall {
+  from { transform: translateY(0); }
+  to   { transform: translateY(110vh); }
+}
+
+/* Lightning flash for storms */
+.wr-lightning {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  animation: wr-flash 7s ease-in-out infinite;
+}
+@keyframes wr-flash {
+  0%, 92%, 100% { opacity: 0; }
+  93% { opacity: 0.5; }
+  94% { opacity: 0; }
+  95% { opacity: 0.3; }
+  96% { opacity: 0; }
+}
+
+/* Snow */
+.wr-snow-layer { position: absolute; inset: 0; }
+.wr-snowflake {
+  position: absolute;
+  top: -10px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.9;
+  animation-name: wr-snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes wr-snowfall {
+  0%   { transform: translateY(0) translateX(0); }
+  50%  { transform: translateY(55vh) translateX(18px); }
+  100% { transform: translateY(110vh) translateX(-10px); }
+}
+
+/* Fog */
+.wr-fog-layer {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.08) 0px,
+    rgba(255, 255, 255, 0.08) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  backdrop-filter: blur(1px);
+  animation: wr-fog-drift 18s ease-in-out infinite alternate;
+}
+@keyframes wr-fog-drift {
+  from { opacity: 0.5; transform: translateX(0); }
+  to   { opacity: 0.85; transform: translateX(30px); }
+}
+
+/* ---------- Top bar ---------- */
+.wr-topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 0;
+}
+
+.wr-icon-btn,
+.wr-unit-pill {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.wr-icon-btn {
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wr-unit-pill {
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.wr-icon-btn:hover,
+.wr-unit-pill:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+/* ---------- Glass card ---------- */
+.wr-card {
+  position: relative;
+  z-index: 3;
+  margin: auto 20px 28px;
+  max-width: 460px;
+  width: calc(100% - 40px);
+  align-self: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 28px;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  padding: 28px 26px 24px;
+  animation: wr-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes wr-card-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wr-card-header { margin-bottom: 10px; }
+
+.wr-city {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.wr-country {
+  font-size: 16px;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.wr-desc {
+  margin: 4px 0 0;
+  font-size: 14px;
+  text-transform: capitalize;
+  opacity: 0.85;
+}
+
+.wr-temp-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin: 18px 0 22px;
+}
+
+.wr-temp {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-size: 76px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.wr-temp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  opacity: 0.85;
+  padding-bottom: 10px;
+}
+
+.wr-minmax {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.wr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.wr-stat {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wr-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+.wr-stat-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Loading state ---------- */
+.wr-loading {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 3;
+  position: relative;
+}
+
+.wr-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: wr-spin 0.9s linear infinite;
+}
+
+@keyframes wr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Error state ---------- */
+.wr-error-card {
+  margin: auto;
+  z-index: 3;
+  position: relative;
+  max-width: 380px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  padding: 32px 26px;
+}
+
+.wr-error-icon { font-size: 32px; }
+
+.wr-error-card h2 {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  margin: 10px 0 6px;
+  font-size: 20px;
+}
+
+.wr-error-card p {
+  opacity: 0.8;
+  font-size: 14px;
+  margin: 0 0 18px;
+}
+
+.wr-back-btn {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.wr-back-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .wr-temp { font-size: 64px; }
+  .wr-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .wr-card { padding: 22px 18px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wr-cloud, .wr-raindrop, .wr-snowflake, .wr-star, .wr-lightning, .wr-fog-layer, .wr-celestial {
+    animation: none !important;
+    transition: none !important;
+  }
+}
