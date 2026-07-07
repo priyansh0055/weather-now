@@ -3,7 +3,7 @@ import axios from "axios";
 import WeatherResultScreen from "./WeatherResultScreen";
 
 export default function WEATHER({ initialCity , onBack}) {
-  const [city, setcity] = useState(initialCity || "");
+  const [, setcity] = useState(initialCity || "");
   const [weather, setweather] = useState(null);
   const [loading, setloading] = useState(false);
   const [error, seterror] = useState("");
