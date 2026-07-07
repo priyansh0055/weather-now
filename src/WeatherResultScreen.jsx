@@ -54,7 +54,6 @@ function useCelestial(data, now) {
     }
     const { sunrise, sunset } = data.sys;
     const tzOffsetSec = data.timezone ?? 0;
-    const nowSec = now / 1000 + tzOffsetSec - new Date().getTimezoneOffset() * 60 * -1 * 0; // keep UTC math simple
     const currentUtc = now / 1000;
     const localNow = currentUtc + tzOffsetSec;
 

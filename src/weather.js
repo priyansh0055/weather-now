@@ -9,9 +9,6 @@ export default function WEATHER({ initialCity , onBack}) {
   const [error, seterror] = useState("");
   const [unit, setunit] = useState("metric"); // 'metric' = °C, 'imperial' = °F
 
-  const handlecitychange = (event) => {
-    setcity(event.target.value);
-  };
 
   const fetchweather = async (cityToFetch, unitToUse = unit) => {
     setloading(true);
@@ -37,15 +34,6 @@ export default function WEATHER({ initialCity , onBack}) {
     } finally {
       setloading(false);
     }
-  };
-
-  const processcity = () => {
-    if (!city.trim()) {
-      setweather(null);
-      seterror("Please enter a city name.");
-      return;
-    }
-    fetchweather(city);
   };
 
   const handletoggleunit = () => {
