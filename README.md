@@ -58,7 +58,7 @@ REACT_APP_WEATHER_KEY=your_openweathermap_api_key_here
 npm start
 ```
 
-Open [http://localhost:3000](https://weather-now-coral-six.vercel.app/) to view it in the browser. The page reloads automatically on changes.
+Open [https://weather-now-coral-six.vercel.app/] to view it in the browser. The page reloads automatically on changes.
 
 ### Build for production
 
