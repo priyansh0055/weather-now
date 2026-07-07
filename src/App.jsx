@@ -18,7 +18,13 @@ function App() {
       onClose={() => setShowSearch(false)}
     />
   ) : (
-    <Weather initialCity={selectedCity} />
+   <Weather
+    initialCity={selectedCity}
+    onBack={() => {
+        setShowSearch(true);
+        setSelectedCity("");
+    }}
+/>
   );
 }
 

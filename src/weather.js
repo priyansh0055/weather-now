@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import WeatherResultScreen from "./WeatherResultScreen";
 
-export default function WEATHER({ initialCity }) {
+export default function WEATHER({ initialCity , onBack}) {
   const [city, setcity] = useState(initialCity || "");
   const [weather, setweather] = useState(null);
   const [loading, setloading] = useState(false);
@@ -72,11 +72,12 @@ export default function WEATHER({ initialCity }) {
       error={error}
       unit={unit}
       onToggleUnit={handletoggleunit}
-      onBack={() => {
-        setweather(null);
-        setcity("");
-        seterror("");
-      }}
+     onBack={() => {
+    setweather(null);
+    setcity("");
+    seterror("");
+    onBack?.();
+}}
     />
   );
-}
+} 

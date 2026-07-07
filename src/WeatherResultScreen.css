@@ -225,26 +225,40 @@
 }
 
 /* ---------- Glass card ---------- */
+/* ---------- Glass card ---------- */
 .wr-card {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   z-index: 3;
-  margin: auto 20px 28px;
-  max-width: 460px;
-  width: calc(100% - 40px);
-  align-self: center;
+
+  width: min(460px, calc(100% - 40px));
+
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 28px;
+
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
+
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+
   padding: 28px 26px 24px;
+
   animation: wr-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes wr-card-in {
-  from { opacity: 0; transform: translateY(24px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 24px)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .wr-card-header { margin-bottom: 10px; }

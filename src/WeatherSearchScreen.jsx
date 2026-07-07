@@ -41,6 +41,7 @@ const SCENES = [
       [750, 150, 60, 110], [820, 50, 32, 210], [860, 140, 70, 120], [940, 110, 45, 150],
       [995, 170, 85, 90], [1090, 90, 38, 170], [1140, 150, 60, 110],
     ],
+    
   },
   {
     key: 'reykjavik',
@@ -63,12 +64,7 @@ const INDIA_CHIPS = [
   { name: 'Jaipur', icon: 'partly_cloudy_day', accent: 'wn-slate' },
 ];
 
-const PREVIEWS = [
-  { city: 'Mumbai', icon: 'wb_sunny', color: 'var(--wn-amber)', temp: '31°', cond: 'Humid & clear' },
-  { city: 'Tokyo', icon: 'clear_night', color: 'var(--wn-slate)', temp: '18°', cond: 'Clear night' },
-  { city: 'New York', icon: 'partly_cloudy_day', color: 'var(--wn-slate)', temp: '21°', cond: 'Partly cloudy' },
-  { city: 'Reykjavik', icon: 'ac_unit', color: 'var(--wn-sky)', temp: '4°', cond: 'Cold & crisp' },
-];
+
 
 function Skyline({ buildings }) {
   return (
@@ -84,14 +80,7 @@ function Skyline({ buildings }) {
   );
 }
 
-/**
- * WeatherSearchScreen
- *
- * Props:
- *  - onSearch(query: string)   called when the user submits the search box
- *  - onSelectCity(cityName: string)  called when a chip or preview card is clicked
- *  - onClose()                 called when the close (X) button is clicked
- */
+
 export default function WeatherSearchScreen({ onSearch, onSelectCity, onClose }) {
   const [query, setQuery] = useState('');
 
@@ -161,27 +150,6 @@ export default function WeatherSearchScreen({ onSearch, onSelectCity, onClose })
             <div className="wn-chip-label">Popular in India</div>
           </div>
         </main>
-
-        <footer className="wn-strip-wrap">
-          <div className="wn-preview-strip">
-            {PREVIEWS.map((p) => (
-              <div
-                key={p.city}
-                className="wn-preview-card"
-                onClick={() => onSelectCity && onSelectCity(p.city)}
-              >
-                <div className="wn-preview-row">
-                  <span className="wn-city">{p.city}</span>
-                  <span className="material-symbols-outlined" style={{ color: p.color, fontSize: 18 }}>
-                    {p.icon}
-                  </span>
-                </div>
-                <div className="wn-preview-temp">{p.temp}</div>
-                <div className="wn-preview-cond">{p.cond}</div>
-              </div>
-            ))}
-          </div>
-        </footer>
       </div>
     </div>
   );
